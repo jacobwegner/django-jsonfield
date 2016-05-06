@@ -97,6 +97,15 @@ class JSONFieldBase(six.with_metaclass(SubfieldBase, models.Field)):
         is still necessary for Django's deserializer"""
         return value
 
+    def get_prep_lookup(self, lookup_type, value):
+        if lookup_type in ["exact"]:
+            return value
+        if lookup_type == "in":
+            return [v for v in value]
+        if lookup_type == "isnull":
+            return value
+        raise TypeError('Lookup type %r not supported' % lookup_type)
+
     def get_db_prep_value(self, value, connection, prepared=False):
         """Convert JSON object to a string"""
         if self.null and value is None:
